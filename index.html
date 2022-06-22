@@ -6,12 +6,10 @@ layout: default
 
 <div class="my-6">
   <div class="my-5 d-flex flex-justify-between">
-    <label for="vid">Vendor ID <input class="px-2 rounded-2" type="text" name="vid" id="vid" /></label>
-    <label for="pid">Product ID <input class="px-2 rounded-2" type="text" name="pid" id="pid" /></label>
+    <label for="vid">Vendor ID <input class="mx-2 form-control" type="text" name="vid" id="vid" /></label>
+    <label for="pid">Product ID <input class="mx-2 form-control" type="text" name="pid" id="pid" /></label>
     <button class="px-2 btn btn-primary" type="button" onclick="getDevices()">Connect</button>
   </div>
-
-  <pre class="my-5 anim-fade-in border v-hidden" id="status"></pre>
 
   <form class="my-5">
     <div class="input-group">
@@ -21,6 +19,8 @@ layout: default
       </span>
     </div>
   </form>
+
+  <pre class="my-5 anim-fade-in border v-hidden" id="status"></pre>
 </div>
 
 <script>
