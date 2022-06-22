@@ -2,7 +2,7 @@
 layout: default
 ---
 
-<link rel="stylesheet" href="/assets/css/style.css" />
+<!-- <link rel="stylesheet" href="https://unpkg.com/@primer/css@^19.0.0/dist/primer.css" /> -->
 
 <div>
   <div class="p-5 d-flex flex-justify-between">
@@ -11,9 +11,9 @@ layout: default
     <label for="pid">Product ID</label>
     <input type="text" name="pid" id="pid" />
   </div>
-  <button class="p-5 btn" onclick="getDevices()">Connect</button>
+  <button class="px-2 btn btn-primary" type="button" onclick="getDevices()">Connect</button>
 
-  <pre class="anim-fade-in anim-fade-out border v-hidden" id="status"></pre>
+  <pre class="anim-fade-in border v-hidden" id="status"></pre>
 </div>
 
 <script>
@@ -22,6 +22,10 @@ layout: default
   const _devices = [];
 
   async function getDevices() {
+    document.getElementById('status').innerText = '';
+    document.getElementById('status').classList.remove('v-hidden');
+    document.getElementById('status').innerText = 'Connecting...';
+
     try {
       const vid = document.getElementById('vid').value;
       const pid = document.getElementById('pid').value;
@@ -37,7 +41,7 @@ layout: default
 
       attachDevice(device);
     } catch (e) {
-      // No device was selected.
+      document.getElementById('status').innerText = 'No device selected.';
       console.log(e);
     }
   }
@@ -52,9 +56,14 @@ layout: default
     console.log('device trying to attach', device);
 
     _devices.push(device);
-    document.getElementById('status').innerText += 'Attached: ' + device.manufacturerName + ' ' + device.productName;
-    document.getElementById('status').classList.remove('v-hidden');
-    document.getElementById('status').innerText += JSON.stringify(device, null, 2);
+
+    document.getElementById('status').innerText += `Attached: ${device.manufacturerName} ${device.productName}\n`;
+    document.getElementById('status').innerText += `Vendor ID: 0x${device.vendorId.toString(16)}\n`;
+    document.getElementById('status').innerText += `Product ID: 0x${device.productId.toString(16)}\n`;
+    document.getElementById('status').innerText += `Serial Number: 0x${device.serialNumber.toString(16)}\n`;
+    document.getElementById('status').innerText += `Device Version: ${device.deviceVersionMajor}.${device.deviceVersionMinor}.${device.deviceVersionSubminor}\n`;
+    document.getElementById('status').innerText += `USB Version: ${device.usbVersionMajor}.${device.usbVersionMinor}.${device.usbVersionSubminor}\n`;
+
     return;
   }
 </script>
