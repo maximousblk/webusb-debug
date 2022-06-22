@@ -4,7 +4,7 @@ layout: default
 
 <link rel="stylesheet" href="https://unpkg.com/@primer/css@^19.0.0/dist/primer.css" />
 
-<div>
+<div class="my-3">
   <div class="p-5 d-flex flex-justify-between">
     <label for="vid">Vendor ID</label>
     <input type="text" name="vid" id="vid" />
@@ -13,7 +13,7 @@ layout: default
   </div>
   <button class="px-2 btn btn-primary" type="button" onclick="getDevices()">Connect</button>
 
-  <pre class="anim-fade-in border v-hidden" id="status"></pre>
+  <pre class="my-3 anim-fade-in border v-hidden" id="status"></pre>
 </div>
 
 <script>
