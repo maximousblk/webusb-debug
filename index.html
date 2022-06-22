@@ -20,18 +20,17 @@ layout: default
     </div>
   </form>
 
-  <pre class="my-5 anim-fade-in border v-hidden" id="status"></pre>
+  <pre class="my-5 border" id="status">Connect a USB Device</pre>
 </div>
 
 <script>
   console.log('Started WebUSB Debug!');
+  const LogUI = document.getElementById('status');
 
   const _devices = [];
 
   async function getDevices() {
-    document.getElementById('status').innerText = '';
-    document.getElementById('status').classList.remove('v-hidden');
-    document.getElementById('status').innerText = 'Connecting...\n';
+    LogUI.innerText = 'Connecting...\n';
 
     try {
       const vid = document.getElementById('vid').value;
@@ -48,7 +47,7 @@ layout: default
 
       attachDevice(device);
     } catch (e) {
-      document.getElementById('status').innerText = 'No device selected.\n';
+      LogUI.innerText = 'No device selected.\n';
       console.log(e);
     }
   }
@@ -64,12 +63,12 @@ layout: default
 
     _devices.push(device);
 
-    document.getElementById('status').innerText += `Attached: ${device.manufacturerName} ${device.productName}\n`;
-    document.getElementById('status').innerText += `Vendor ID: 0x${device.vendorId.toString(16)}\n`;
-    document.getElementById('status').innerText += `Product ID: 0x${device.productId.toString(16)}\n`;
-    document.getElementById('status').innerText += `Serial Number: ${device.serialNumber}\n`;
-    document.getElementById('status').innerText += `Device Version: ${device.deviceVersionMajor}.${device.deviceVersionMinor}.${device.deviceVersionSubminor}\n`;
-    document.getElementById('status').innerText += `USB Version: ${device.usbVersionMajor}.${device.usbVersionMinor}.${device.usbVersionSubminor}\n`;
+    LogUI.innerText += `Connected: ${device.manufacturerName} ${device.productName}\n`;
+    LogUI.innerText += `Vendor ID: 0x${device.vendorId.toString(16).toUpperCase()}\n`;
+    LogUI.innerText += `Product ID: 0x${device.productId.toString(16).toUpperCase()}\n`;
+    LogUI.innerText += `Serial Number: ${device.serialNumber}\n`;
+    LogUI.innerText += `Device Version: ${device.deviceVersionMajor}.${device.deviceVersionMinor}.${device.deviceVersionSubminor}\n`;
+    LogUI.innerText += `USB Version: ${device.usbVersionMajor}.${device.usbVersionMinor}.${device.usbVersionSubminor}\n`;
 
     return;
   }
