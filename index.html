@@ -4,21 +4,17 @@ layout: default
 
 <link rel="stylesheet" href="/assets/css/style.css" />
 
-<div>
-  <label for="vid">Vendor ID</label>
-  <input type="text" name="vid" id="vid" />
-  <label for="pid">Product ID</label>
-  <input type="text" name="pid" id="pid" />
-  <button onclick="getDevices()">Connect</button>
-</div>
+<div class="d-flex flex-column">
+  <div class="p-5 d-flex flex-justify-between">
+    <label for="vid">Vendor ID</label>
+    <input type="text" name="vid" id="vid" />
+    <label for="pid">Product ID</label>
+    <input type="text" name="pid" id="pid" />
+  </div>
+  <button class="p-5 btn" onclick="getDevices()">Connect</button>
 
-<pre>
-  Lorem ipsum dolor sit amet consectetur adipisicing elit.
-  Corporis totam tempora voluptatum doloremque,
-  voluptatem reprehenderit,
-  quod ab nihil laudantium ea fugiat vel aperiam animi nulla magni asperiores,
-  cumque sapiente quidem.
-</pre>
+  <pre class="anim-fade-in anim-fade-out border v-hidden" id="status"></pre>
+</div>
 
 <script>
   console.log('Started WebUSB Debug!');
@@ -56,6 +52,7 @@ layout: default
     console.log('device trying to attach', device);
 
     _devices.push(device);
+    getElementById('status').innerHTML = 'Attached: ' + device.manufacturerName + ' ' + device.productName;
     return;
   }
 </script>
