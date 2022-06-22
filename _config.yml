@@ -1,6 +1,15 @@
 title: WebUSB Debug
 description: A simple tool to test WebUSB compatible devices
 
+baseurl: "/webusb-debug"
+
+
 markdown: GFM
 remote_theme: pages-themes/primer@v0.2.0
-plugins: [jekyll-remote-theme]
+
+sass:
+  style: compressed
+  sass_dir: styles
+
+plugins:
+  - jekyll-remote-theme
