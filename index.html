@@ -2,7 +2,7 @@
 layout: default
 ---
 
-<!-- <link rel="stylesheet" href="https://unpkg.com/@primer/css@^19.0.0/dist/primer.css" /> -->
+<link rel="stylesheet" href="https://unpkg.com/@primer/css@^19.0.0/dist/primer.css" />
 
 <div>
   <div class="p-5 d-flex flex-justify-between">
@@ -24,7 +24,7 @@ layout: default
   async function getDevices() {
     document.getElementById('status').innerText = '';
     document.getElementById('status').classList.remove('v-hidden');
-    document.getElementById('status').innerText = 'Connecting...';
+    document.getElementById('status').innerText = 'Connecting...\n';
 
     try {
       const vid = document.getElementById('vid').value;
@@ -41,7 +41,7 @@ layout: default
 
       attachDevice(device);
     } catch (e) {
-      document.getElementById('status').innerText = 'No device selected.';
+      document.getElementById('status').innerText = 'No device selected.\n';
       console.log(e);
     }
   }
