@@ -52,7 +52,9 @@ layout: default
     console.log('device trying to attach', device);
 
     _devices.push(device);
-    getElementById('status').innerHTML = 'Attached: ' + device.manufacturerName + ' ' + device.productName;
+    document.getElementById('status').innerText += 'Attached: ' + device.manufacturerName + ' ' + device.productName;
+    document.getElementById('status').classList.remove('v-hidden');
+    document.getElementById('status').innerText += JSON.stringify(device, null, 2);
     return;
   }
 </script>
