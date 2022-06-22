@@ -4,4 +4,58 @@ layout: default
 
 <link rel="stylesheet" href="/assets/css/style.css" />
 
-<h1>Hello USB!</h1>
+<div>
+  <label for="vid">Vendor ID</label>
+  <input type="text" name="vid" id="vid" />
+  <label for="pid">Product ID</label>
+  <input type="text" name="pid" id="pid" />
+  <button onclick="getDevices()">Connect</button>
+</div>
+
+<pre>
+  Lorem ipsum dolor sit amet consectetur adipisicing elit.
+  Corporis totam tempora voluptatum doloremque,
+  voluptatem reprehenderit,
+  quod ab nihil laudantium ea fugiat vel aperiam animi nulla magni asperiores,
+  cumque sapiente quidem.
+</pre>
+
+<script>
+  console.log('Started WebUSB Debug!');
+
+  const _devices = [];
+
+  async function getDevices() {
+    try {
+      const vid = document.getElementById('vid').value;
+      const pid = document.getElementById('pid').value;
+
+      const device = await navigator.usb.requestDevice({
+        filters: [
+          {
+            vendorId: vid ? Number.parseInt(vid, 16) : undefined,
+            productId: pid ? Number.parseInt(pid, 16) : undefined,
+          },
+        ],
+      });
+
+      attachDevice(device);
+    } catch (e) {
+      // No device was selected.
+      console.log(e);
+    }
+  }
+
+  async function attachDevice(device) {
+    console.log(device);
+    if (!device) return;
+
+    await device.open();
+    if (device.configuration === null) await device.selectConfiguration(1);
+
+    console.log('device trying to attach', device);
+
+    _devices.push(device);
+    return;
+  }
+</script>
