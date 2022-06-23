@@ -20,7 +20,7 @@ layout: default
     </div>
   </form>
 
-  <pre class="my-5 border" id="status">Connect a USB Device</pre>
+  <pre class="m-5 border" id="status">Connect a USB Device</pre>
 </div>
 
 <script>
@@ -70,6 +70,30 @@ layout: default
     LogUI.innerText += `Device Version: ${device.deviceVersionMajor}.${device.deviceVersionMinor}.${device.deviceVersionSubminor}\n`;
     LogUI.innerText += `USB Version: ${device.usbVersionMajor}.${device.usbVersionMinor}.${device.usbVersionSubminor}\n`;
 
+    // - configerations
+    //   - interfaces
+    //     - alternates
+    //       - endpoints
+
+    LogUI.innerText += `\nConfigurations:\n${device.configurations
+      .map(
+        (cnfg) =>
+          `  - ${cnfg.configurationValue}: ${cnfg.configurationName} ${device.configuration.configurationValue == cnfg.configurationValue ? '*' : ''}\n` +
+          cnfg.interfaces
+            .map(
+              (intf) =>
+                `    - interface ${intf.interfaceNumber} ${intf.claimed ? '(claimed)' : ''}\n` +
+                intf.alternates
+                  .map(
+                    (alt) =>
+                      `      - alt: setting ${alt.alternateSetting} / interface { name: ${alt.interfaceName}, proto: ${alt.interfaceProtocol}, class: ${alt.interfaceClass}.${alt.interfaceSubclass} }\n` +
+                      alt.endpoints.map((ep) => `        - endpoint ${ep.endpointNumber}: ${ep.type} ${ep.direction} ${ep.packetSize}b`).join('\n')
+                  )
+                  .join('\n')
+            )
+            .join('\n')
+      )
+      .join('')}\n`;
     return;
   }
 </script>
