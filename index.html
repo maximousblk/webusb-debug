@@ -2,82 +2,137 @@
 layout: default
 ---
 
-<link rel="stylesheet" href="https://unpkg.com/@primer/css@^19.0.0/dist/primer.css" />
+<style>
+  html,
+  body {
+    max-height: 100vh;
+  }
+</style>
 
-<div class="my-6" x-data="{ devices: [] }">
-  <div class="my-5 d-flex flex-justify-between">
-    <label for="vid">Vendor ID <input class="mx-2 form-control" type="text" name="vid" id="vid" /></label>
-    <label for="pid">Product ID <input class="mx-2 form-control" type="text" name="pid" id="pid" /></label>
-    <button class="px-2 btn btn-primary" type="button" x-on:click="devices.push(getDevices())">Connect</button>
+<link rel="stylesheet" href="https://unpkg.com/@primer/css@^19.0.0/dist/primer.css" />
+<script src="//unpkg.com/alpinejs" defer></script>
+
+<div class="my-6" x-data="debug" x-init="console.log('Started WebUSB Debug!')">
+  <div class="my-5 d-flex">
+    <input class="mr-2 form-control" id="vid" x-model="vid" placeholder="Filter Vendor ID" type="text" />
+    <input class="mr-2 form-control" id="pid" x-model="pid" placeholder="Filter Product ID" type="text" />
+    <button class="px-3 btn btn-primary" type="button" @click="await getDevices()">Add new device</button>
   </div>
 
-  <form class="my-5">
-    <div class="input-group">
-      <input class="form-control" type="text" placeholder="Data" aria-label="Data" />
-      <span class="input-group-button">
-        <button class="btn" type="button" aria-label="Send data to device">Send</button>
-      </span>
-    </div>
-  </form>
+  <div class="my-5 d-flex">
+    <select class="mr-2 form-select" x-model="selectid" x-on:change="selected = devices.find(d => `${d.vendorId}${d.productId}` == selectid)">
+      <template x-if="!devices.length">
+        <option value="" disabled selected>No devices available</option>
+      </template>
+      <template x-for="device in devices">
+        <option :value="`${device.vendorId}${device.productId}`" x-text="`${device.manufacturerName} ${device.productName}`.trim() || 'Unknown'"></option>
+      </template>
+    </select>
 
-  <pre class="m-5 border" id="status">Connect a USB Device</pre>
+    <select class="mr-2 form-select" x-model="selectcfg" x-on:change="await selected.selectConfiguration(Number.parseInt(selectcfg))">
+      <template x-if="!selected?.configurations?.length">
+        <option value="" disabled selected>No configuration available</option>
+      </template>
+      <template x-for="cfg in selected?.configurations || []">
+        <option :value="cfg.configurationValue" x-text="`${cfg.configurationValue}: ${cfg.configurationName || 'Unnamed'}`.trim()"></option>
+      </template>
+    </select>
+
+    <select class="mr-2 form-select" x-model="selectintf" x-on:change="await selected.claimInterface(Number.parseInt(selectintf))">
+      <template x-if="!selected?.configuration.interfaces.length">
+        <option value="" disabled selected>No intervaces available</option>
+      </template>
+      <template x-for="intf in selected?.configuration.interfaces || []">
+        <option :value="intf.interfaceNumber" x-text="`interface ${intf.interfaceNumber}`.trim()"></option>
+      </template>
+    </select>
+
+    <button class="px-3 btn btn-primary" type="button" @click="await connectDevice()">Connect</button>
+  </div>
+
+  <div class="input-group">
+    <input class="form-control" type="text" placeholder="Data" aria-label="Data" />
+    <span class="input-group-button">
+      <button class="btn btn-outline" type="button" aria-label="Send data to device">Send</button>
+    </span>
+  </div>
+
+  <pre class="my-5 border" x-text="logs" x-transition style="overflow-y: auto; height: 100%"></pre>
 </div>
 
 <script>
-  console.log('Started WebUSB Debug!');
-  const LogUI = document.getElementById('status');
+  document.addEventListener('alpine:init', () => {
+    Alpine.data('debug', () => ({
+      logs: 'Connect a USB Device',
+      log: function (line) {
+        this.logs += `\n${line}`;
+      },
+      devices: [],
+      selected: undefined,
+      selectid: null,
+      selectcfg: null,
+      selectintf: null,
+      vid: '',
+      pid: '',
+      getDevices: async function () {
+        try {
+          const device = await navigator.usb.requestDevice({
+            filters: [
+              {
+                vendorId: this.vid ? Number.parseInt(this.vid, 16) : undefined,
+                productId: this.pid ? Number.parseInt(this.pid, 16) : undefined,
+              },
+            ],
+          });
 
-  const _devices = [];
+          if (!this.devices.find((d) => `${d.vendorId}${d.productId}` === `${device.vendorId}${device.productId}`)) {
+            this.devices.push(device);
+          }
 
-  async function getDevices() {
-    LogUI.innerText = 'Connecting...\n';
+          this.selected = device;
+          this.selectid = `${device.vendorId}${device.productId}`;
+          this.log(`Added new device: ${getDeviceName(device)}`);
 
-    try {
-      const vid = document.getElementById('vid').value;
-      const pid = document.getElementById('pid').value;
+          return device;
+        } catch (e) {
+          this.log(`Could not add device: ${e.message}`);
+          console.log(e);
+        }
+      },
+      connectDevice: async function () {
+        try {
+          if (!this.selected) return;
 
-      const device = await navigator.usb.requestDevice({
-        filters: [
-          {
-            vendorId: vid ? Number.parseInt(vid, 16) : undefined,
-            productId: pid ? Number.parseInt(pid, 16) : undefined,
-          },
-        ],
-      });
+          console.log('attaching device:', this.selected);
+          await this.selected.open();
 
-      attachDevice(device);
+          this.log(`Connected to device: ${getDeviceName(this.selected)}`);
+          this.log(getDeviceDetails(this.selected));
 
-      return device;
-    } catch (e) {
-      LogUI.innerText = 'No device selected.\n';
-      console.log(e);
-    }
+          return;
+        } catch (e) {
+          this.log(`Could not connect to ${getDeviceName(this.selected)}: ${e.message}`);
+          console.log(e);
+        }
+      },
+    }));
+  });
+
+  function getDeviceName(device) {
+    return `${device.manufacturerName} ${device.productName}`.trim() || 'Unknown';
   }
 
-  async function attachDevice(device) {
-    console.log(device);
-    if (!device) return;
+  function getDeviceDetails(device) {
+    let info = '\n';
 
-    await device.open();
-    if (device.configuration === null) await device.selectConfiguration(1);
+    info += `Device Name: ${device.manufacturerName} ${device.productName}\n`;
+    info += `Device Version: ${device.deviceVersionMajor}.${device.deviceVersionMinor}.${device.deviceVersionSubminor}\n`;
+    info += `Vendor ID: 0x${device.vendorId.toString(16).toUpperCase()}\n`;
+    info += `Product ID: 0x${device.productId.toString(16).toUpperCase()}\n`;
+    info += `Serial Number: ${device.serialNumber}\n`;
+    info += `USB Version: ${device.usbVersionMajor}.${device.usbVersionMinor}.${device.usbVersionSubminor}\n`;
 
-    console.log('device trying to attach', device);
-
-    _devices.push(device);
-
-    LogUI.innerText += `Connected: ${device.manufacturerName} ${device.productName}\n`;
-    LogUI.innerText += `Vendor ID: 0x${device.vendorId.toString(16).toUpperCase()}\n`;
-    LogUI.innerText += `Product ID: 0x${device.productId.toString(16).toUpperCase()}\n`;
-    LogUI.innerText += `Serial Number: ${device.serialNumber}\n`;
-    LogUI.innerText += `Device Version: ${device.deviceVersionMajor}.${device.deviceVersionMinor}.${device.deviceVersionSubminor}\n`;
-    LogUI.innerText += `USB Version: ${device.usbVersionMajor}.${device.usbVersionMinor}.${device.usbVersionSubminor}\n`;
-
-    // - configerations
-    //   - interfaces
-    //     - alternates
-    //       - endpoints
-
-    LogUI.innerText += `\nConfigurations:\n${device.configurations
+    info += `\nConfigurations:\n${device.configurations
       .map(
         (cnfg) =>
           `  - ${cnfg.configurationValue}: ${cnfg.configurationName} ${device.configuration.configurationValue == cnfg.configurationValue ? '*' : ''}\n` +
@@ -96,8 +151,6 @@ layout: default
             .join('\n')
       )
       .join('')}\n`;
-    return;
+    return info;
   }
 </script>
-
-<script src="//unpkg.com/alpinejs" defer></script>
