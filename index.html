@@ -4,11 +4,11 @@ layout: default
 
 <link rel="stylesheet" href="https://unpkg.com/@primer/css@^19.0.0/dist/primer.css" />
 
-<div class="my-6">
+<div class="my-6" x-data="{ devices: [] }">
   <div class="my-5 d-flex flex-justify-between">
     <label for="vid">Vendor ID <input class="mx-2 form-control" type="text" name="vid" id="vid" /></label>
     <label for="pid">Product ID <input class="mx-2 form-control" type="text" name="pid" id="pid" /></label>
-    <button class="px-2 btn btn-primary" type="button" onclick="getDevices()">Connect</button>
+    <button class="px-2 btn btn-primary" type="button" x-on:click="devices.push(getDevices())">Connect</button>
   </div>
 
   <form class="my-5">
@@ -46,6 +46,8 @@ layout: default
       });
 
       attachDevice(device);
+
+      return device;
     } catch (e) {
       LogUI.innerText = 'No device selected.\n';
       console.log(e);
@@ -97,3 +99,5 @@ layout: default
     return;
   }
 </script>
+
+<script src="//unpkg.com/alpinejs" defer></script>
